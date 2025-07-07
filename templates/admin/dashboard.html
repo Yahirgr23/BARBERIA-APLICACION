@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Administrador - CORTES Y ESTILOS ISA{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-grid-1x2-fill me-2"></i>PANEL DE CONTROL</h1>
+        <span class="text-muted">{{ fecha_formateada }}</span>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6 col-xl-3"><div class="card text-white bg-primary"><div class="card-body"><div class="d-flex justify-content-between"><div><h5 class="card-title">INGRESOS DE HOY</h5><h2 class="fw-bold">${{ "{:,.2f}".format(ingresos_hoy) }}</h2></div><div class="fs-1 opacity-50"><i class="bi bi-cash-coin"></i></div></div></div></div></div>
+        <div class="col-md-6 col-xl-3"><div class="card text-white bg-info"><div class="card-body"><div class="d-flex justify-content-between"><div><h5 class="card-title">SERVICIOS DE HOY</h5><h2 class="fw-bold">{{ servicios_hoy }}</h2></div><div class="fs-1 opacity-50"><i class="bi bi-scissors"></i></div></div></div></div></div>
+        <div class="col-md-6 col-xl-3"><div class="card text-white bg-success"><div class="card-body"><div class="d-flex justify-content-between"><div><h5 class="card-title">INGRESOS (SEMANA)</h5><h2 class="fw-bold">${{ "{:,.2f}".format(ingresos_semana) }}</h2></div><div class="fs-1 opacity-50"><i class="bi bi-calendar-week"></i></div></div></div></div></div>
+        <div class="col-md-6 col-xl-3"><div class="card text-white bg-warning"><div class="card-body"><div class="d-flex justify-content-between"><div><h5 class="card-title">INGRESOS (MES)</h5><h2 class="fw-bold">${{ "{:,.2f}".format(ingresos_mes) }}</h2></div><div class="fs-1 opacity-50"><i class="bi bi-calendar-month"></i></div></div></div></div></div>
+    </div>
+
+    <div class="row g-4 mt-2">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header"><h5 class="mb-0"><i class="bi bi-trophy-fill text-warning me-2"></i>Top Barberos de Hoy</h5></div>
+                <div class="card-body">
+                    {% if top_barberos %}
+                        <ul class="list-group list-group-flush">
+                            {% for barbero, total in top_barberos %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        {% if loop.index == 1 %}<i class="bi bi-1-circle-fill text-warning"></i>
+                                        {% elif loop.index == 2 %}<i class="bi bi-2-circle-fill text-secondary"></i>
+                                        {% elif loop.index == 3 %}<i class="bi bi-3-circle-fill text-danger"></i>
+                                        {% else %}<i class="bi bi-dot"></i>
+                                        {% endif %}
+                                        {{ barbero }}
+                                    </span>
+                                    <span class="badge bg-success rounded-pill">${{ "{:,.2f}".format(total) }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted text-center mt-3">No hay ingresos registrados hoy para mostrar un top.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header"><h5 class="mb-0"><i class="bi bi-star-fill text-primary me-2"></i>Servicios Populares de Hoy</h5></div>
+                <div class="card-body">
+                    {% if servicios_populares %}
+                         <ul class="list-group list-group-flush">
+                            {% for servicio, count in servicios_populares %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ servicio }}
+                                    <span class="badge bg-primary rounded-pill">{{ count }} {% if count > 1 %}veces{% else %}vez{% endif %}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted text-center mt-3">No se han realizado servicios hoy.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 p-4 border rounded bg-light text-center">
+        <h4 class="mb-3">Accesos Rápidos</h4>
+        <a href="{{ url_for('admin_resumen_diario_barberos') }}" class="btn btn-dark mx-2"><i class="bi bi-calendar-day-fill me-1"></i> Ver Resumen Detallado del Día</a>
+        <a href="{{ url_for('admin_liquidacion_semanal') }}" class="btn btn-outline-dark mx-2"><i class="bi bi-calendar-week-fill me-1"></i> Ir a Liquidación Semanal</a>
+    </div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Gestionar Servicios - CORTES Y ESTILOS ISA{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="h4 mb-0"><i class="bi bi-list-task me-2"></i>Servicios de la Barbería</h2>
+            <a href="{{ url_for('admin_nuevo_servicio') }}" class="btn btn-sm btn-success">
+                <i class="bi bi-plus-circle-fill me-1"></i> Agregar Nuevo Servicio
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if servicios %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Nombre del Servicio</th>
+                        <th scope="col">Precio</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col" class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for servicio in servicios %}
+                    <tr>
+                        <td><strong>{{ servicio.nombre }}</strong></td>
+                        <td>${{ "%.2f"|format(servicio.precio) }}</td>
+                        <td>
+                            {% if servicio.activo %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ url_for('admin_editar_servicio', servicio_id=servicio.id) }}" class="btn btn-sm btn-warning" title="Editar Servicio">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <form method="POST" action="{{ url_for('admin_toggle_servicio_activo', servicio_id=servicio.id) }}" style="display: inline-block;" class="ms-1">
+                                <button type="submit" class="btn btn-sm {% if servicio.activo %}btn-outline-secondary{% else %}btn-outline-success{% endif %}" title="{% if servicio.activo %}Desactivar{% else %}Activar{% endif %} Servicio">
+                                    {% if servicio.activo %}
+                                        <i class="bi bi-toggle-off"></i>
+                                    {% else %}
+                                        <i class="bi bi-toggle-on"></i>
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="text-center p-4">
+                <i class="bi bi-emoji-frown" style="font-size: 3rem; color: #6c757d;"></i>
+                <p class="mt-3">Aún no se han registrado servicios.</p>
+                <p>Haz clic en "Agregar Nuevo Servicio" para definir los servicios que ofreces.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

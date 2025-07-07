@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - CORTES Y ESTILOS ISA{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-7 col-lg-5 col-xl-4">
+        
+        <div class="text-center mb-4">
+            <i class="bi bi-scissors" style="font-size: 3rem; color: #343a40;"></i>
+            <h1 class="h3 mb-3 fw-normal">CORTES Y ESTILOS ISA</h1>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
+                
+                <form method="POST" action="{{ url_for('login') }}" novalidate>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" placeholder="Nombre de Usuario" required autofocus>
+                        <label for="nombre_usuario">Nombre de Usuario</label>
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="contrasena" name="contrasena" placeholder="Contraseña" required>
+                        <label for="contrasena">Contraseña</label>
+                    </div>
+                    
+                    <div class="d-grid mt-4">
+                        <button class="btn btn-primary btn-lg" type="submit">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

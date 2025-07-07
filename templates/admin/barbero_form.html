@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} - CORTES Y ESTILOS ISA{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8 col-lg-7">
+
+        <div class="card">
+            <div class="card-header bg-dark text-white text-center">
+                <h2 class="h4 mb-0"><i class="bi bi-person-plus-fill me-2"></i>{{ titulo }}</h2>
+            </div>
+            <div class="card-body p-4">
+
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nombre_completo" class="form-label">Nombre Completo</label>
+                            <input type="text" class="form-control" id="nombre_completo" name="nombre_completo" value="{{ barbero.nombre_completo if barbero else '' }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="nombre_usuario" class="form-label">Nombre de Usuario</label>
+                            <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="{{ barbero.nombre_usuario if barbero else '' }}" {% if barbero %}readonly{% endif %} required>
+                             {% if barbero %}
+                                <div class="form-text">El nombre de usuario no se puede cambiar después de la creación.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contrasena" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="contrasena" name="contrasena" placeholder="********">
+                        {% if barbero %}
+                            <div id="passwordHelpBlock" class="form-text">
+                              Deja este campo en blanco si no deseas cambiar la contraseña.
+                            </div>
+                        {% else %}
+                             <div id="passwordHelpBlock" class="form-text">
+                              La contraseña es requerida para nuevos barberos.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="rol" class="form-label">Rol</label>
+                        <select class="form-select" id="rol" name="rol" {% if barbero and barbero.nombre_usuario == 'admin' %}disabled{% endif %}>
+                            <option value="barbero" {% if barbero and barbero.rol == 'barbero' %}selected{% endif %}>Barbero</option>
+                            <option value="admin" {% if barbero and barbero.rol == 'admin' %}selected{% endif %}>Administrador</option>
+                        </select>
+                         {% if barbero and barbero.nombre_usuario == 'admin' %}
+                            <div class="form-text text-danger">El rol del 'admin' principal no se puede cambiar.</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle-fill me-2"></i>Guardar Cambios
+                        </button>
+                        <a href="{{ url_for('admin_barberos') }}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

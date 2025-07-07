@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Nuevo Corte - CORTES Y ESTILOS ISA{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8 col-lg-7">
+
+        <div class="card">
+            <div class="card-header bg-dark text-white text-center">
+                <h2 class="h4 mb-0"><i class="bi bi-plus-circle-fill me-2"></i>Registrar un Nuevo Servicio</h2>
+            </div>
+            <div class="card-body p-4">
+
+                {% if servicios_con_comision %}
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="servicio_id" class="form-label fs-5">Selecciona el servicio realizado:</label>
+                            <select class="form-select form-select-lg" id="servicio_id" name="servicio_id" required>
+                                <option value="" selected disabled>-- Elige una opción --</option>
+                                
+                                {% for item in servicios_con_comision %}
+                                    <option value="{{ item.servicio.id }}">
+                                        {{ item.servicio.nombre }} - ${{ "{:,.2f}".format(item.servicio.precio) }} 
+                                        <span class="text-success fw-bold">(Tu comisión: {{ "{:.0%}".format(item.comision) }})</span>
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle-fill me-2"></i>Confirmar Registro
+                            </button>
+                            <a href="{{ url_for('barbero_dashboard') }}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
+                            </a>
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="text-center p-3">
+                        <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 3rem;"></i>
+                        <h4 class="mt-3">No hay servicios disponibles</h4>
+                        <p class="text-muted">
+                            No se han encontrado servicios activos para registrar. Por favor, contacta al administrador.
+                        </p>
+                        <a href="{{ url_for('barbero_dashboard') }}" class="btn btn-secondary mt-3">
+                            <i class="bi bi-arrow-left-circle me-1"></i>Volver al Panel
+                        </a>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

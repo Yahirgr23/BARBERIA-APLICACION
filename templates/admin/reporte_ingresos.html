@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Reporte de Ingresos Globales - CORTES Y ESTILOS ISA{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-file-earmark-bar-graph-fill me-2"></i>Reporte de Ingresos Globales</h1>
+        <div class="btn-group">
+            {% if periodo == 'personalizado' %}
+                <a href="{{ url_for('exportar_reporte_ingresos', formato='pdf', periodo=periodo, fecha_inicio=fecha_inicio_form, fecha_fin=fecha_fin_form) }}" class="btn btn-danger btn-sm">
+                    <i class="bi bi-file-earmark-pdf-fill me-1"></i>Exportar PDF
+                </a>
+                <a href="{{ url_for('exportar_reporte_ingresos', formato='excel', periodo=periodo, fecha_inicio=fecha_inicio_form, fecha_fin=fecha_fin_form) }}" class="btn btn-success btn-sm">
+                    <i class="bi bi-file-earmark-excel-fill me-1"></i>Exportar Excel
+                </a>
+            {% elif periodo == 'semanal' %}
+                <a href="{{ url_for('exportar_reporte_ingresos', formato='pdf', periodo=periodo, year=selected_year, week=selected_week) }}" class="btn btn-danger btn-sm">
+                    <i class="bi bi-file-earmark-pdf-fill me-1"></i>Exportar PDF
+                </a>
+                <a href="{{ url_for('exportar_reporte_ingresos', formato='excel', periodo=periodo, year=selected_year, week=selected_week) }}" class="btn btn-success btn-sm">
+                    <i class="bi bi-file-earmark-excel-fill me-1"></i>Exportar Excel
+                </a>
+            {% elif periodo == 'mensual' %}
+                <a href="{{ url_for('exportar_reporte_ingresos', formato='pdf', periodo=periodo, year=selected_year, month=selected_month) }}" class="btn btn-danger btn-sm">
+                    <i class="bi bi-file-earmark-pdf-fill me-1"></i>Exportar PDF
+                </a>
+                <a href="{{ url_for('exportar_reporte_ingresos', formato='excel', periodo=periodo, year=selected_year, month=selected_month) }}" class="btn btn-success btn-sm">
+                    <i class="bi bi-file-earmark-excel-fill me-1"></i>Exportar Excel
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h2 class="h4 mb-0"><i class="bi bi-funnel-fill me-2"></i>Filtrar Ingresos por Período</h2>
+        </div>
+        <div class="card-body bg-light">
+            {# Formulario dinámico que cambia según el 'periodo' #}
+            <form method="GET" class="row g-3 align-items-end">
+                
+                {# Selector de Periodo #}
+                <div class="col-md-3">
+                    <label class="form-label"><strong>Tipo de Reporte:</strong></label>
+                    <div class="btn-group w-100">
+                        <a href="{{ url_for('admin_reporte_ingresos', periodo='personalizado') }}" class="btn {% if periodo == 'personalizado' %}btn-primary{% else %}btn-outline-primary{% endif %}">Rango</a>
+                        <a href="{{ url_for('admin_reporte_ingresos', periodo='semanal') }}" class="btn {% if periodo == 'semanal' %}btn-primary{% else %}btn-outline-primary{% endif %}">Semanal</a>
+                        <a href="{{ url_for('admin_reporte_ingresos', periodo='mensual') }}" class="btn {% if periodo == 'mensual' %}btn-primary{% else %}btn-outline-primary{% endif %}">Mensual</a>
+                    </div>
+                </div>
+
+                {# Campos para RANGO PERSONALIZADO #}
+                {% if periodo == 'personalizado' %}
+                    {# Necesitamos un formulario POST para el rango personalizado #}
+                    <div class="col-md-9">
+                        <form method="POST" action="{{ url_for('admin_reporte_ingresos', periodo='personalizado') }}" class="row g-3 align-items-end">
+                             <div class="col-md-4">
+                                <label for="fecha_inicio" class="form-label">Fecha de Inicio:</label>
+                                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio_form }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="fecha_fin" class="form-label">Fecha de Fin:</label>
+                                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin_form }}">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-info w-100"><i class="bi bi-search me-1"></i>Consultar Rango</button>
+                            </div>
+                        </form>
+                    </div>
+
+                {# Campos para SEMANAL #}
+                {% elif periodo == 'semanal' %}
+                    <div class="col-md-3">
+                        <label for="year" class="form-label">Año:</label>
+                        <select name="year" id="year" class="form-select">
+                            {% for anio_option in anios_disponibles %}
+                                <option value="{{ anio_option }}" {% if anio_option == selected_year %}selected{% endif %}>{{ anio_option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="week" class="form-label">Semana ISO:</label>
+                        <input type="number" name="week" id="week" value="{{ selected_week }}" min="1" max="53" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-info w-100"><i class="bi bi-search me-1"></i>Consultar Semana</button>
+                    </div>
+                
+                {# Campos para MENSUAL #}
+                {% elif periodo == 'mensual' %}
+                    <div class="col-md-3">
+                        <label for="year" class="form-label">Año:</label>
+                        <select name="year" id="year" class="form-select">
+                             {% for anio_option in anios_disponibles %}
+                                <option value="{{ anio_option }}" {% if anio_option == selected_year %}selected{% endif %}>{{ anio_option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                     <div class="col-md-3">
+                        <label for="month" class="form-label">Mes:</label>
+                        <select name="month" id="month" class="form-select">
+                            {% for i in range(1, 13) %}
+                                <option value="{{ i }}" {% if i == selected_month %}selected{% endif %}>{{ i }} - {{ ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"][i-1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                         <button type="submit" class="btn btn-info w-100"><i class="bi bi-search me-1"></i>Consultar Mes</button>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+        <div class="card-body text-center">
+            <h3 class="h5 text-muted">{{ titulo_reporte }}</h3>
+            <p class="lead">{{ detalle_periodo }}</p>
+            <div class="display-4 fw-bold text-success">
+                ${{ "{:,.2f}".format(ingresos_totales) }}
+            </div>
+            <p class="text-muted mb-0">Ingreso Bruto Total del Período</p>
+        </div>
+    </div>
+{% endblock %}

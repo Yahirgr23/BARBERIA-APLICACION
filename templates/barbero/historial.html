@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Historial - CORTES Y ESTILOS ISA{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-clock-history me-2"></i>Mi Historial de Actividad</h1>
+        <div class="btn-group">
+            <a href="{{ url_for('exportar_historial_barbero', formato='pdf', periodo=periodo_seleccionado, fecha_inicio=fecha_inicio_form, fecha_fin=fecha_fin_form) }}" class="btn btn-danger btn-sm">
+                <i class="bi bi-file-earmark-pdf-fill me-1"></i>PDF
+            </a>
+            <a href="{{ url_for('exportar_historial_barbero', formato='excel', periodo=periodo_seleccionado, fecha_inicio=fecha_inicio_form, fecha_fin=fecha_fin_form) }}" class="btn btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel-fill me-1"></i>Excel
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-end g-3">
+                <div class="col-auto">
+                    <div class="btn-group">
+                        <a href="{{ url_for('barbero_historial', periodo='semana') }}" class="btn {% if periodo_seleccionado == 'semana' %}btn-dark{% else %}btn-outline-dark{% endif %}">Semana</a>
+                        <a href="{{ url_for('barbero_historial', periodo='mes') }}" class="btn {% if periodo_seleccionado == 'mes' %}btn-dark{% else %}btn-outline-dark{% endif %}">Mes</a>
+                    </div>
+                </div>
+                <div class="col">
+                    <form method="GET" action="{{ url_for('barbero_historial') }}">
+                        <input type="hidden" name="periodo" value="personalizado">
+                        <div class="row g-2">
+                            <div class="col-md">
+                                <label for="fecha_inicio" class="form-label-sm">Desde:</label>
+                                <input type="date" class="form-control form-control-sm" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio_form }}">
+                            </div>
+                            <div class="col-md">
+                                <label for="fecha_fin" class="form-label-sm">Hasta:</label>
+                                <input type="date" class="form-control form-control-sm" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin_form }}">
+                            </div>
+                            <div class="col-md-auto d-flex align-items-end">
+                                <button type="submit" class="btn btn-sm btn-primary">Buscar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-card-list me-2"></i>Resultados para: {{ titulo_periodo }}</h5>
+        </div>
+        <div class="card-body">
+            {% if cortes_agrupados %}
+                {% for fecha, cortes_del_dia in cortes_agrupados.items() %}
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2 mb-2"><strong>{{ fecha }}</strong></h6>
+                        <ul class="list-group list-group-flush">
+                            {% for item in cortes_del_dia %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span>{% if item.corte.servicio_prestado %}{{ item.corte.servicio_prestado.nombre }}{% else %}Servicio Desconocido{% endif %}</span><br>
+                                        <small class="text-muted"><i class="bi bi-clock"></i> {{ item.corte.fecha_hora_corte | localtime('%H:%M') }} hrs</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-secondary rounded-pill">${{ "{:,.2f}".format(item.corte.precio_registrado) }}</span><br>
+                                        <small class="text-success fw-bold">Ganancia: +${{ "{:,.2f}".format(item.ganancia) }}</small>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center p-4"><p class="mt-3">No hay actividad registrada en el período seleccionado.</p></div>
+            {% endif %}
+        </div>
+        <div class="card-footer bg-light">
+            <div class="row text-center">
+                <div class="col"><strong>Servicios en Período:</strong> {{ cortes_periodo|length }}</div>
+                <div class="col"><strong>Ingreso Bruto en Período:</strong> ${{ "{:,.2f}".format(total_bruto_periodo) }}</div>
+                <div class="col"><strong>Mi Ganancia en Período:</strong> <span class="fw-bold text-success">${{ "{:,.2f}".format(total_comision_periodo) }}</span></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

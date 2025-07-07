@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Resumen Diario por Barbero{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Resumen Diario por Barbero - {{ fecha_actual_local.strftime('%d/%m/%Y') if fecha_actual_local else 'Fecha no disponible' }} (Local)</h2>
+        <div class="btn-group">
+            <a href="{{ url_for('exportar_resumen_diario', formato='pdf') }}" class="btn btn-danger btn-sm">
+                <i class="bi bi-file-earmark-pdf-fill me-1"></i>Exportar PDF
+            </a>
+            <a href="{{ url_for('exportar_resumen_diario', formato='excel') }}" class="btn btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel-fill me-1"></i>Exportar Excel
+            </a>
+        </div>
+    </div>
+    
+    <div class="table-responsive mt-4">
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Barbero</th>
+                    <th>Nº Servicios</th>
+                    <th>Total Bruto Hoy</th>
+                    <th>% Comisión</th>
+                    <th>Comisión Neta (Paga Estimada)</th>
+                    <th>Monto para Barbería</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in resumen_barberos %}
+                <tr>
+                    <td>{{ item.nombre }}</td>
+                    <td>{{ item.cantidad_cortes }}</td>
+                    <td>${{ "{:,.2f}".format(item.total_bruto_dia) }}</td>
+                    <td>{{ "{:.0%}".format(item.porcentaje_comision) }}</td>
+                    <td><b>${{ "{:,.2f}".format(item.comision_neta_dia) }}</b></td>
+                    
+                    {# --- LÍNEA CORREGIDA --- #}
+                    {# El nombre correcto es 'monto_para_barberia' (con 'a') #}
+                    <td>${{ "{:,.2f}".format(item.monto_para_barberia) }}</td>
+                
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">No hay actividad de barberos para mostrar hoy o no hay barberos activos.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            {% if resumen_barberos %}
+            <tfoot class="table-group-divider">
+                <tr class="fw-bold">
+                    <td colspan="2">TOTALES DEL DÍA:</td>
+                    <td>${{ "{:,.2f}".format(total_bruto_dia_global) }}</td>
+                    <td></td>
+                    <td>${{ "{:,.2f}".format(total_comisiones_dia_global) }}</td>
+
+                    {# --- LÍNEA CORREGIDA (TAMBIÉN EN TOTALES) --- #}
+                    <td>${{ "{:,.2f}".format(total_parabarberia_dia_global) }}</td>
+                </tr>
+            </tfoot>
+            {% endif %}
+        </table>
+    </div>
+
+    {# Botón de "Finalizar Día" #}
+    {% if not dia_ya_finalizado %}
+        <form method="POST" action="{{ url_for('admin_finalizar_dia') }}" onsubmit="return confirm('¿Estás seguro de que deseas finalizar el día? Esta acción cerrará las ventas de hoy y registrará los totales.');" class="mt-4">
+            <button type="submit" class="btn btn-danger">Finalizar Día y Registrar Cierre</button>
+        </form>
+    {% else %}
+        <div class="alert alert-info mt-4">El día {{ fecha_actual_local.strftime('%d/%m/%Y') if fecha_actual_local else '' }} ya ha sido finalizado.</div>
+    {% endif %}
+
+{% endblock %}

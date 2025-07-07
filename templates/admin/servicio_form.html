@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} - CORTES Y ESTILOS ISA{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8 col-lg-7">
+        <form method="POST">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white text-center">
+                    <h2 class="h4 mb-0"><i class="bi bi-tag-fill me-2"></i>{{ titulo }}</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label for="nombre_servicio" class="form-label">Nombre del Servicio</label>
+                        <input type="text" class="form-control" id="nombre_servicio" name="nombre_servicio" value="{{ servicio.nombre if servicio else '' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="precio_servicio" class="form-label">Precio ($)</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="precio_servicio" name="precio_servicio" value="{{ servicio.precio if servicio and servicio.precio is not none else '' }}" required>
+                    </div>
+                    {% if servicio %}
+                    <div class="mb-3 form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="activo" name="activo" {% if servicio.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">Servicio Activo</label>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if servicio and barberos %}
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="h5 mb-0"><i class="bi bi-percent me-2"></i>Comisiones por Barbero para este Servicio</h3>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted small">
+                        Asigna un porcentaje de comisión específico para cada barbero para este servicio. 
+                        Si dejas un campo vacío o en 0, se usará el porcentaje por defecto del barbero (si lo tiene). Introduce el valor en porcentaje (ej: 60 para 60%).
+                    </p>
+                    {% for barbero in barberos %}
+                        <div class="row g-2 align-items-center mb-2">
+                            <div class="col-6">
+                                <label for="comision_barbero_{{ barbero.id }}" class="col-form-label">{{ barbero.nombre_completo }}</label>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group">
+                                    {# Buscamos si hay una comisión específica. Si no, mostramos la por defecto del barbero. #}
+                                    {% set comision_especifica = comisiones_actuales.get(barbero.id) %}
+                                    <input type="number" step="1" min="0" max="100" class="form-control" name="comision_barbero_{{ barbero.id }}" id="comision_barbero_{{ barbero.id }}" value="{{ (comision_especifica * 100) if comision_especifica is not none else '' }}" placeholder="Defecto: {{ '%.0f'|format(barbero.porcentaje_comision * 100) }}%">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-check-circle-fill me-2"></i>Guardar Todos los Cambios</button>
+                <a href="{{ url_for('admin_servicios') }}" class="btn btn-secondary"><i class="bi bi-x-circle me-2"></i>Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Mi Panel{% endblock %}
+{% block content %}
+    <h2>Mi Panel - {{ current_user.nombre_completo }}</h2>
+    <a href="{{ url_for('barbero_registrar_corte') }}" class="btn btn-success mb-3">Registrar Nuevo Corte</a>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            Resumen de Hoy ({{ now.strftime('%d/%m/%Y') }})
+        </div>
+        <div class="card-body">
+            <p class="card-text"><strong>Total Ingresado Hoy (Bruto):</strong> ${{ "{:,.2f}".format(total_ingresado_hoy_bruto) }}</p>
+            <p class="card-text"><strong>Tu Porcentaje de Comisión:</strong> {{ "{:.0%}".format(porcentaje_comision_barbero) }}</p>
+            <p class="card-text"><strong>Tu Comisión Estimada Hoy (Neta):</strong> ${{ "{:,.2f}".format(comision_neta_hoy) }}</p>
+        </div>
+    </div>
+
+    <h4>Mis Cortes de Hoy (Total Bruto: ${{ "{:,.2f}".format(total_ingresado_hoy_bruto) }})</h4>
+    {% if cortes_hoy %}
+        <ul class="list-group">
+            {% for corte in cortes_hoy %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Corte realizado a las {{ corte.fecha_hora_corte.strftime('%H:%M') }}
+                    <span class="badge bg-primary rounded-pill">${{ "{:,.2f}".format(corte.precio_corte) }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No has registrado cortes hoy.</p>
+    {% endif %}
+{% endblock %}

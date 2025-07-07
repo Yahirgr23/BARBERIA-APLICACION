@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Liquidación Semanal - CORTES Y ESTILOS ISA{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-calendar-week me-2"></i>Liquidación Semanal</h1>
+        <div class="btn-group">
+            <a href="{{ url_for('exportar_liquidacion_semanal', formato='pdf', year=selected_year, week=selected_week) }}" class="btn btn-danger btn-sm">
+                <i class="bi bi-file-earmark-pdf-fill me-1"></i>Exportar PDF
+            </a>
+            <a href="{{ url_for('exportar_liquidacion_semanal', formato='excel', year=selected_year, week=selected_week) }}" class="btn btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel-fill me-1"></i>Exportar Excel
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body bg-light">
+            <form method="GET" class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <label for="week" class="form-label"><strong>Semana Seleccionada:</strong></label>
+                    <p class="form-control-plaintext mb-0">{{ detalle_periodo_general }}</p>
+                </div>
+                <div class="col-md-3 col-6">
+                    <label for="year" class="form-label">Cambiar Año:</label>
+                    <select name="year" id="year" class="form-select">
+                         {% for anio_option in anios_disponibles %}
+                        <option value="{{ anio_option }}" {{ 'selected' if anio_option == selected_year }}>{{ anio_option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 col-6">
+                    <label for="week" class="form-label">Semana:</label>
+                    <input type="number" name="week" id="week" value="{{ selected_week }}" min="1" max="53" class="form-control">
+                </div>
+                <div class="col-md-2 align-self-end">
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-info"><i class="bi bi-eye-fill me-1"></i>Ver</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if not liquidacion_data %}
+        <div class="text-center p-4">
+            <i class="bi bi-info-circle" style="font-size: 3rem; color: #6c757d;"></i>
+            <p class="mt-3">No hay datos de liquidación para la semana seleccionada.</p>
+            <p class="text-muted">Puede que no haya barberos activos o no se hayan registrado servicios en este período.</p>
+        </div>
+    {% else %}
+        {% for item in liquidacion_data %}
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="h5 mb-0">
+                        <i class="bi bi-person-fill me-2"></i>{{ item.barbero.nombre_completo }}
+                    </span>
+                    <button class="btn btn-sm btn-outline-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-detail-{{ item.barbero.id }}-{{ loop.index }}" aria-expanded="false" aria-controls="collapse-detail-{{ item.barbero.id }}-{{ loop.index }}">
+                        <i class="bi bi-card-list me-1"></i>Detalle Diario
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    {# --- Columna Lunes a Sábado --- #}
+                    <div class="col-lg-6">
+                        <div class="p-3 border rounded h-100">
+                            <h5 class="border-bottom pb-2 mb-3"><i class="bi bi-calendar-range me-2"></i>{{ desc_periodo_monsat }}</h5>
+                            <p><strong>Total Bruto:</strong> ${{ "{:,.2f}".format(item.monsat_bruto) }}</p>
+                            <p class="fs-5"><strong>Monto a Pagar:</strong> <strong class="text-success">${{ "{:,.2f}".format(item.monsat_comision) }}</strong></p>
+                            
+                            {% if item.pago_monsat_registrado %}
+                                <div class="alert alert-success small p-2"><i class="bi bi-check-circle-fill me-1"></i>Pagado el {{ item.pago_monsat_registrado.fecha_pago_registrado | localtime('%d/%m/%Y %H:%M') }}</div>
+                            {% elif item.monsat_bruto > 0 %}
+                                <form method="POST" action="{{ url_for('admin_liquidacion_semanal', year=selected_year, week=selected_week) }}" class="mt-3 d-grid">
+                                    <input type="hidden" name="barbero_id_pagado" value="{{ item.barbero.id }}">
+                                    <input type="hidden" name="total_bruto_pagado" value="{{ item.monsat_bruto }}">
+                                    <input type="hidden" name="monto_comision_pagado" value="{{ item.monsat_comision }}">
+                                    <input type="hidden" name="tipo_pago" value="monsat">
+                                    <button type="submit" class="btn btn-primary"><i class="bi bi-send-check-fill me-1"></i>Registrar Pago (Lun-Sáb)</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {# --- Columna Domingo --- #}
+                    <div class="col-lg-6">
+                         <div class="p-3 border rounded h-100 bg-light-info"> {# Un fondo ligeramente diferente #}
+                            <h5 class="border-bottom pb-2 mb-3"><i class="bi bi-sun-fill me-2"></i>{{ desc_periodo_domingo }}</h5>
+                             <p><strong>Total Bruto:</strong> ${{ "{:,.2f}".format(item.domingo_bruto) }}</p>
+                            <p class="fs-5"><strong>Monto a Pagar:</strong> <strong class="text-success">${{ "{:,.2f}".format(item.domingo_comision) }}</strong></p>
+
+                            {% if item.pago_domingo_registrado %}
+                                <div class="alert alert-success small p-2"><i class="bi bi-check-circle-fill me-1"></i>Pagado el {{ item.pago_domingo_registrado.fecha_pago_registrado | localtime('%d/%m/%Y %H:%M') }}</div>
+                            {% elif item.domingo_bruto > 0 %}
+                                <form method="POST" action="{{ url_for('admin_liquidacion_semanal', year=selected_year, week=selected_week) }}" class="mt-3 d-grid">
+                                    <input type="hidden" name="barbero_id_pagado" value="{{ item.barbero.id }}">
+                                    <input type="hidden" name="total_bruto_pagado" value="{{ item.domingo_bruto }}">
+                                    <input type="hidden" name="monto_comision_pagado" value="{{ item.domingo_comision }}">
+                                    <input type="hidden" name="tipo_pago" value="domingo">
+                                    <button type="submit" class="btn btn-info"><i class="bi bi-send-check-fill me-1"></i>Registrar Pago (Domingo)</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {# --- Detalle Diario Colapsable --- #}
+                <div class="collapse mt-3" id="collapse-detail-{{ item.barbero.id }}-{{ loop.index }}">
+                     <h6 class="text-muted">Detalle Diario (Lunes a Domingo) para {{ item.barbero.nombre_completo }}</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover table-bordered">
+                            <thead class="table-light">
+                                <tr><th>Fecha</th><th>Nº Serv.</th><th>Bruto Día</th><th>Comisión Día</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for dia_data in item.detalle_diario %}
+                                    {% if dia_data.fecha.weekday() == 6 %} {# Domingo #}
+                                        <tr class="table-info fw-bold">
+                                            <td>{{ dia_data.fecha.strftime('%a %d/%m') }} (Domingo)</td><td>{{ dia_data.cantidad_cortes }}</td><td>${{ "{:,.2f}".format(dia_data.bruto_dia) }}</td><td>${{ "{:,.2f}".format(dia_data.comision_dia) }}</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td>{{ dia_data.fecha.strftime('%a %d/%m') }}</td><td>{{ dia_data.cantidad_cortes }}</td><td>${{ "{:,.2f}".format(dia_data.bruto_dia) }}</td><td>${{ "{:,.2f}".format(dia_data.comision_dia) }}</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+{% endblock %}
